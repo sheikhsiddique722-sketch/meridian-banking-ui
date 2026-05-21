@@ -1,0 +1,1235 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Meridian — Private Banking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@300;400;500&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ========== TOAST CONTAINER ========== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ========== TRANSACTION DETAIL DRAWER ========== -->
+<div class="tx-overlay" id="txOverlay">
+  <div class="tx-drawer" id="txDrawer">
+    <div class="tx-drawer-handle" id="txHandle"></div>
+    <div class="tx-drawer-head">
+      <h3>Transaction <em style="font-style:italic;color:var(--gold-soft)">detail</em></h3>
+      <button class="tx-drawer-close" id="txClose">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="tx-drawer-hero">
+      <div class="tx-drawer-icon" id="txDrawerIcon"></div>
+      <div class="tx-drawer-name" id="txDrawerName">—</div>
+      <div class="tx-drawer-sub" id="txDrawerSub">—</div>
+      <div class="tx-drawer-amount" id="txDrawerAmount">—</div>
+      <div class="tx-drawer-status settled" id="txDrawerStatus">
+        <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/></svg>
+        <span id="txDrawerStatusText">Settled</span>
+      </div>
+    </div>
+
+    <div class="tx-drawer-rows">
+      <div class="tx-drawer-row"><span class="rk">Date</span><span class="rv" id="txDrawerDate">—</span></div>
+      <div class="tx-drawer-row"><span class="rk">Time</span><span class="rv" id="txDrawerTime">—</span></div>
+      <div class="tx-drawer-row"><span class="rk">Category</span><span class="rv" id="txDrawerCat">—</span></div>
+      <div class="tx-drawer-row"><span class="rk">Card used</span><span class="rv">Sovereign ···· 8821</span></div>
+      <div class="tx-drawer-row"><span class="rk">Reference</span><span class="rv" id="txDrawerRef">—</span></div>
+    </div>
+
+    <div class="tx-drawer-actions">
+      <button class="tx-drawer-action" id="btnDownload">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Download receipt
+      </button>
+      <button class="tx-drawer-action" id="btnNote">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Add a note
+      </button>
+      <button class="tx-drawer-action" id="btnShare">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51L8.59 10.49"/></svg>
+        Share
+      </button>
+      <button class="tx-drawer-action danger" id="btnDispute">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+        Dispute
+      </button>
+    </div>
+
+    <!-- NOTE PANEL -->
+    <div id="txNotePanel" style="display:none;padding:16px 24px 0">
+      <div style="font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:8px">Your note</div>
+      <textarea id="txNoteInput" placeholder="Add a private note to this transaction…"
+        style="width:100%;background:var(--glass-2);border:1px solid var(--line);border-radius:var(--r-md);
+               padding:12px 14px;color:var(--ink);font-family:var(--body);font-size:13px;resize:none;
+               outline:none;height:80px;transition:border-color .2s"
+        onfocus="this.style.borderColor='var(--gold-deep)'"
+        onblur="this.style.borderColor='var(--line)'"
+      ></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="btnNoteSave" style="flex:1;padding:10px;border-radius:var(--r-sm);background:linear-gradient(180deg,#e6cf9c,#c9a86a);border:0;color:#1a1408;font-weight:600;font-size:13px;cursor:pointer;">Save note</button>
+        <button id="btnNoteCancel" style="padding:10px 16px;border-radius:var(--r-sm);background:transparent;border:1px solid var(--line);color:var(--ink-dim);font-size:13px;cursor:pointer;">Cancel</button>
+      </div>
+    </div>
+
+    <!-- DISPUTE PANEL -->
+    <div id="txDisputePanel" style="display:none;padding:16px 24px 0">
+      <div style="font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--red);margin-bottom:12px">File a dispute</div>
+      <div id="disputeOptions" style="display:flex;flex-direction:column;gap:8px">
+        <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;transition:border-color .2s" class="dispute-opt">
+          <input type="radio" name="disputeReason" value="not_mine" style="accent-color:var(--gold)"> <span style="font-size:13px">I didn't make this transaction</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;transition:border-color .2s" class="dispute-opt">
+          <input type="radio" name="disputeReason" value="wrong_amount" style="accent-color:var(--gold)"> <span style="font-size:13px">Wrong amount charged</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;transition:border-color .2s" class="dispute-opt">
+          <input type="radio" name="disputeReason" value="duplicate" style="accent-color:var(--gold)"> <span style="font-size:13px">Duplicate charge</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;transition:border-color .2s" class="dispute-opt">
+          <input type="radio" name="disputeReason" value="service" style="accent-color:var(--gold)"> <span style="font-size:13px">Service / product not received</span>
+        </label>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button id="btnDisputeSubmit" style="flex:1;padding:10px;border-radius:var(--r-sm);background:rgba(232,143,143,.15);border:1px solid rgba(232,143,143,.35);color:var(--red);font-weight:600;font-size:13px;cursor:pointer;">Submit dispute</button>
+        <button id="btnDisputeCancel" style="padding:10px 16px;border-radius:var(--r-sm);background:transparent;border:1px solid var(--line);color:var(--ink-dim);font-size:13px;cursor:pointer;">Cancel</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== SEARCH MODAL ========== -->
+<div class="modal-overlay" id="searchModal">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="text" id="searchInput" placeholder="Search transactions, recipients, pages…"/>
+      <span class="esc-key" id="searchEsc">ESC</span>
+    </div>
+    <div class="search-results">
+      <div class="search-group-lbl">Quick Nav</div>
+      <div class="search-item" data-nav="overview">
+        <div class="si-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg></div>
+        <div><div class="si-name">Overview</div><div class="si-sub">Dashboard home</div></div>
+      </div>
+      <div class="search-item" data-nav="cards">
+        <div class="si-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg></div>
+        <div><div class="si-name">Cards</div><div class="si-sub">Manage your cards</div></div>
+      </div>
+      <div class="search-item" data-nav="transfers">
+        <div class="si-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h16M14 6l6 6-6 6"/></svg></div>
+        <div><div class="si-name">Transfers</div><div class="si-sub">Send & receive money</div></div>
+      </div>
+      <div class="search-item" data-nav="analytics">
+        <div class="si-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3v18h18M7 14l4-4 4 3 5-7"/></svg></div>
+        <div><div class="si-name">Analytics</div><div class="si-sub">Spending & cash flow</div></div>
+      </div>
+      <div class="search-group-lbl">Recent Transactions</div>
+      <div class="search-item" data-nav="activity">
+        <div class="si-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2l1 4h10l1-4M5 6h14l-1 14H6L5 6z"/></svg></div>
+        <div><div class="si-name">Le Bernardin</div><div class="si-sub">−$487.30 · Today</div></div>
+      </div>
+      <div class="search-item" data-nav="activity">
+        <div class="si-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9l9-6 9 6v11H3z"/></svg></div>
+        <div><div class="si-name">Aman New York</div><div class="si-sub">−$2,840.00 · Yesterday</div></div>
+      </div>
+      <div class="search-item" data-nav="activity">
+        <div class="si-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h18M12 3v18"/></svg></div>
+        <div><div class="si-name">Wire from Veridian Capital</div><div class="si-sub">+$24,000.00 · Today</div></div>
+      </div>
+    </div>
+    <div class="search-footer">
+      <span><kbd>↵</kbd> select</span>
+      <span><kbd>↑↓</kbd> navigate</span>
+      <span><kbd>ESC</kbd> close</span>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <nav class="sidebar">
+    <div class="brand">
+      <img src="images/logo.svg" class="brand-mark" alt="Meridian logo">
+      <div class="brand-name">Meridian<em>.</em></div>
+    </div>
+
+    <div class="nav-label">Workspace</div>
+    <div class="nav">
+      <a href="#" class="active" data-page="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
+        Overview
+      </a>
+      <a href="#" data-page="cards">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></svg>
+        Cards
+      </a>
+      <a href="#" data-page="transfers">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
+        Transfers
+      </a>
+      <a href="#" data-page="analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3v18h18M7 14l4-4 4 3 5-7"/></svg>
+        Analytics
+      </a>
+      <a href="#" data-page="activity">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        Activity
+      </a>
+    </div>
+
+    <div class="nav-label">Wealth</div>
+    <div class="nav">
+      <a href="#" data-page="investments">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 18l5-6 4 4 8-10"/><path d="M14 6h6v6"/></svg>
+        Investments
+      </a>
+      <a href="#" data-page="savings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v20M17 5H9a3 3 0 100 6h6a3 3 0 010 6H7"/></svg>
+        Savings
+      </a>
+      <a href="#" data-page="concierge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>
+        Concierge
+      </a>
+    </div>
+
+    <!-- DB Status Widget -->
+    <div id="dbWidget" style="margin:0 0 10px;padding:10px 12px;border-radius:var(--r-sm);background:rgba(255,255,255,.02);border:1px solid var(--line);cursor:default">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" stroke-width="1.6"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg>
+        <span style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)">LocalDB</span>
+        <div id="dbDot" style="width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);margin-left:auto;transition:all .3s"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:10px;color:var(--ink-faint)" id="dbRecords">— records</span>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--ink-faint)" id="dbLastSaved">—</span>
+      </div>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="user-chip" id="userChip">
+        <div class="avatar">A</div>
+        <div style="flex:1;min-width:0">
+          <div class="name">Aiden Marlowe</div>
+          <div class="tier">Sovereign Tier</div>
+        </div>
+        <button id="sidebarSignOutBtn" class="icon-btn" title="Sign out" style="width:30px;height:30px;flex-shrink:0;opacity:.55;transition:opacity .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity='.55'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ MAIN ============ -->
+  <main>
+    <!-- topbar -->
+    <header class="topbar anim">
+      <div class="mobile-brand">
+        <img src="images/logo.svg" class="brand-mark" alt="Meridian logo">
+        <div class="brand-name" style="font-size:18px">Meridian<em>.</em></div>
+      </div>
+
+      <div class="greet">
+        <div class="greet-title">
+          <img src="images/logo.svg" class="greet-logo" alt="">
+          <h1 id="greetHeading">Good evening, <em>Aiden</em>.</h1>
+        </div>
+        <p id="greetSub">Monday, 19 May — markets closed. 3 actions pending review.</p>
+      </div>
+
+      <div class="top-actions">
+        <button id="navSignInBtn" type="button" style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:99px;background:rgba(201,168,106,.1);border:1px solid rgba(201,168,106,.35);color:var(--gold-soft);font-size:12px;font-family:var(--body);font-weight:500;letter-spacing:.02em;cursor:pointer;transition:background .2s,border-color .2s" onmouseover="this.style.background='rgba(201,168,106,.18)';this.style.borderColor='rgba(201,168,106,.6)'" onmouseout="this.style.background='rgba(201,168,106,.1)';this.style.borderColor='rgba(201,168,106,.35)'">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+          Sign In
+        </button>
+        <button class="icon-btn" id="searchBtn" aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        </button>
+        <div class="notif-wrap">
+          <button class="icon-btn" id="notifBtn" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8a6 6 0 1112 0c0 7 3 7 3 9H3c0-2 3-2 3-9zM10 21a2 2 0 004 0"/></svg>
+            <span class="dot" id="notifDot"></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="mobile-greet anim">
+      <h1 id="mobileGreetHeading">Good evening, <em>Aiden</em>.</h1>
+      <p>3 actions pending review.</p>
+    </div>
+
+  <div id="page-overview" class="page">
+    <!-- HERO -->
+    <section class="hero">
+      <!-- credit card with flip -->
+      <div class="card-flip-wrap anim" id="cardFlipWrap">
+        <div class="card-flip-inner" id="cardFlipInner">
+          <!-- FRONT -->
+          <div class="card-front">
+            <div class="card-credit" id="creditCard">
+              <div class="card-row">
+                <div>
+                  <div class="card-issuer">Meridian</div>
+                  <div class="card-tier" style="margin-top:2px">Sovereign · Metal</div>
+                </div>
+                <svg width="28" height="20" viewBox="0 0 28 20" fill="none">
+                  <path d="M2 3c0-1 1-2 2-2M26 3c0-1-1-2-2-2M2 17c0 1 1 2 2 2M26 17c0 1-1 2-2 2" stroke="rgba(201,168,106,.5)" stroke-width="1.2"/>
+                  <path d="M6 6c2 0 2 8 8 8s6-8 8-8" stroke="rgba(201,168,106,.7)" stroke-width="1.2" fill="none"/>
+                </svg>
+              </div>
+              <div class="chip"><div class="chip-mid"></div></div>
+              <div class="card-number">4929  •••• ••••  8821</div>
+              <div class="card-foot">
+                <div>
+                  <div class="label">Cardholder</div>
+                  <div class="val">AIDEN MARLOWE</div>
+                </div>
+                <div>
+                  <div class="label">Expires</div>
+                  <div class="val">11/29</div>
+                </div>
+                <div class="card-network">VISA</div>
+              </div>
+            </div>
+          </div>
+          <!-- BACK -->
+          <div class="card-back">
+            <div class="card-back-face">
+              <div class="mag-strip"></div>
+              <div class="sig-area">
+                <div class="sig-panel">
+                  <span class="sig-text">Aiden Marlowe</span>
+                </div>
+                <div class="cvv-box">
+                  <div class="cvv-label">CVV</div>
+                  <div class="cvv-num">847</div>
+                </div>
+              </div>
+              <div class="back-foot">
+                <div class="back-issuer">Meridian</div>
+                <div class="back-info">
+                  Customer service<br>
+                  +1 888 MERIDIAN<br>
+                  meridianbank.com
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-flip-hint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.5 9A9 9 0 005.2 5.2L1 10M3.5 15A9 9 0 0018.8 18.8L23 14"/></svg>
+          flip card
+        </div>
+      </div>
+
+      <!-- balance + quick acts -->
+      <div class="balance-block anim">
+        <div>
+          <div class="balance-label">
+            <span class="l">Total Balance</span>
+            <span class="eye" id="eyeBtn" title="Hide balance">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            </span>
+          </div>
+          <div class="balance-amount" id="balanceAmt">
+            <span class="cur">$</span>0<span class="dec">.00</span>
+          </div>
+          <div class="balance-delta" style="margin-top:10px">
+            <span class="pill">+ $4,218.20</span>
+            <span>vs last month</span>
+          </div>
+        </div>
+
+        <div class="quick-acts">
+          <button class="qa" id="qa-send">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            Send
+          </button>
+          <button class="qa" id="qa-receive">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+            Receive
+          </button>
+          <button class="qa" id="qa-pay">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M4 12h10M4 17h16"/></svg>
+            Pay
+          </button>
+          <button class="qa" id="qa-invest">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 10h4a2 2 0 010 4H9"/></svg>
+            Invest
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ANALYTICS -->
+    <div class="section-head anim">
+      <h2>Cash <em>flow</em></h2>
+      <a href="#" id="viewReportLink">View report</a>
+    </div>
+    <section class="analytics anim">
+      <div class="ana-top">
+        <div class="ana-stat">
+          <div class="l">Spent this month</div>
+          <div class="v" id="chartStatVal">$12,847<span style="font-size:.5em;color:var(--ink-dim)">.30</span></div>
+          <div class="d down" id="chartStatDelta">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 14l5 5 5-5M12 19V5"/></svg>
+            8.2% under budget
+          </div>
+        </div>
+        <div class="ana-tabs" id="anaTabs">
+          <button data-period="7D">7D</button>
+          <button class="active" data-period="30D">30D</button>
+          <button data-period="90D">90D</button>
+          <button data-period="1Y">1Y</button>
+        </div>
+      </div>
+
+      <div class="chart-wrap" id="chartWrap">
+        <svg viewBox="0 0 600 200" preserveAspectRatio="none" id="chart">
+          <defs>
+            <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="rgba(201,168,106,.35)"/>
+              <stop offset="100%" stop-color="rgba(201,168,106,0)"/>
+            </linearGradient>
+          </defs>
+          <g class="chart-grid">
+            <line x1="0" x2="600" y1="40"  y2="40"/>
+            <line x1="0" x2="600" y1="90"  y2="90"/>
+            <line x1="0" x2="600" y1="140" y2="140"/>
+          </g>
+        </svg>
+        <div class="chart-tooltip" id="tt"></div>
+      </div>
+
+      <!-- categories -->
+      <div class="cats" id="catBars">
+        <div class="cat"><div class="cat-name">Dining</div><div class="cat-bar"><span data-w="78"></span></div><div class="cat-amt">$3,210</div></div>
+        <div class="cat"><div class="cat-name">Travel</div><div class="cat-bar"><span data-w="62"></span></div><div class="cat-amt">$2,580</div></div>
+        <div class="cat"><div class="cat-name">Shopping</div><div class="cat-bar"><span data-w="45"></span></div><div class="cat-amt">$1,890</div></div>
+        <div class="cat"><div class="cat-name">Subscriptions</div><div class="cat-bar"><span data-w="28"></span></div><div class="cat-amt">$1,140</div></div>
+        <div class="cat"><div class="cat-name">Other</div><div class="cat-bar"><span data-w="18"></span></div><div class="cat-amt">$827</div></div>
+      </div>
+    </section>
+
+    <!-- TRANSACTIONS -->
+    <div class="section-head anim">
+      <h2>Recent <em>activity</em></h2>
+      <a href="#" id="seeAllLink">See all</a>
+    </div>
+    <section class="tx-list anim">
+      <div class="tx-group-label">Today</div>
+
+      <div class="tx" data-tx="Le Bernardin">
+        <div class="tx-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2l1 4h10l1-4M5 6h14l-1 14H6L5 6z"/><path d="M9 10v6M15 10v6"/></svg>
+        </div>
+        <div class="tx-meta">
+          <div class="name">Le Bernardin</div>
+          <div class="sub">DINING · NEW YORK</div>
+        </div>
+        <div class="tx-amt">−$487.30<span class="time">8:42 PM</span></div>
+      </div>
+
+      <div class="tx" data-tx="Apple iCloud+">
+        <div class="tx-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 17l4-12 4 12M16 12h6M19 9v6"/></svg>
+        </div>
+        <div class="tx-meta">
+          <div class="name">Apple — iCloud+</div>
+          <div class="sub">SUBSCRIPTION · MONTHLY</div>
+        </div>
+        <div class="tx-amt">−$9.99<span class="time">2:15 PM</span></div>
+      </div>
+
+      <div class="tx" data-tx="Wire Veridian">
+        <div class="tx-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h18M12 3v18"/></svg>
+        </div>
+        <div class="tx-meta">
+          <div class="name">Wire from Veridian Capital</div>
+          <div class="sub">DEPOSIT · REF. VC-882019</div>
+        </div>
+        <div class="tx-amt pos">+$24,000.00<span class="time">9:01 AM</span></div>
+      </div>
+
+      <div class="tx-group-label">Yesterday</div>
+
+      <div class="tx" data-tx="Aman New York">
+        <div class="tx-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9l9-6 9 6v11H3z"/><path d="M9 20v-6h6v6"/></svg>
+        </div>
+        <div class="tx-meta">
+          <div class="name">Aman New York</div>
+          <div class="sub">HOSPITALITY · LODGING</div>
+        </div>
+        <div class="tx-amt">−$2,840.00<span class="time">11:20 PM</span></div>
+      </div>
+
+      <div class="tx" data-tx="Eliana Voss">
+        <div class="tx-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
+        </div>
+        <div class="tx-meta">
+          <div class="name">Eliana Voss</div>
+          <div class="sub">TRANSFER · SPLIT BILL</div>
+        </div>
+        <div class="tx-amt pos">+$143.50<span class="time">7:58 PM</span></div>
+      </div>
+
+      <div class="tx" data-tx="Hermes">
+        <div class="tx-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-7"/></svg>
+        </div>
+        <div class="tx-meta">
+          <div class="name">Hermès Madison Ave</div>
+          <div class="sub">RETAIL · APPAREL</div>
+        </div>
+        <div class="tx-amt">−$1,920.00<span class="time">3:14 PM</span></div>
+      </div>
+    </section>
+  </div><!-- /page-overview -->
+
+  <!-- ======== PAGE: CARDS ======== -->
+  <div id="page-cards" class="page">
+    <div class="page-head">
+      <h1>My <em>Cards</em></h1>
+      <p>Manage your Meridian cards and controls.</p>
+    </div>
+    <div class="hero" style="margin-bottom:28px">
+      <div class="card-flip-wrap" id="cardFlipWrap2">
+        <div class="card-flip-inner" id="cardFlipInner2">
+          <div class="card-front">
+            <div class="card-credit" id="cardCredit2">
+              <div class="card-row">
+                <div><div class="card-issuer">Meridian</div><div class="card-tier" style="margin-top:2px">Sovereign · Metal</div></div>
+              </div>
+              <div class="chip"><div class="chip-mid"></div></div>
+              <div class="card-number">4929  •••• ••••  8821</div>
+              <div class="card-foot">
+                <div><div class="label">Cardholder</div><div class="val">AIDEN MARLOWE</div></div>
+                <div><div class="label">Expires</div><div class="val">11/29</div></div>
+                <div class="card-network">VISA</div>
+              </div>
+            </div>
+          </div>
+          <div class="card-back">
+            <div class="card-back-face">
+              <div class="mag-strip"></div>
+              <div class="sig-area">
+                <div class="sig-panel"><span class="sig-text">Aiden Marlowe</span></div>
+                <div class="cvv-box"><div class="cvv-label">CVV</div><div class="cvv-num">847</div></div>
+              </div>
+              <div class="back-foot">
+                <div class="back-issuer">Meridian</div>
+                <div class="back-info">Customer service<br>+1 888 MERIDIAN<br>meridianbank.com</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-flip-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:10px;height:10px"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.5 9A9 9 0 005.2 5.2L1 10M3.5 15A9 9 0 0018.8 18.8L23 14"/></svg> flip</div>
+      </div>
+      <div class="balance-block">
+        <div>
+          <div class="balance-label"><span class="l">Card Limit</span></div>
+          <div class="balance-amount"><span class="cur">$</span><span id="cardLimitDisplay">50,000</span><span class="dec">.00</span></div>
+          <div style="margin-top:8px">
+            <div style="height:5px;background:var(--glass-2);border-radius:99px;overflow:hidden;margin-bottom:6px">
+              <div style="width:25.7%;height:100%;background:linear-gradient(90deg,var(--gold-deep),var(--gold));border-radius:99px;transition:width 1s ease" id="cardUsageBar"></div>
+            </div>
+            <div class="balance-delta"><span class="pill" id="cardUsedPill">$12,847 used</span><span id="cardAvailText">$37,153 available</span></div>
+          </div>
+        </div>
+        <div class="ctrl-row">
+          <button class="ctrl-btn" id="cardFreezeBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v20M4.93 4.93l14.14 14.14M2 12h20M4.93 19.07l14.14-14.14"/></svg><span id="cardFreezeLbl">Freeze</span>
+          </button>
+          <button class="ctrl-btn" id="cardLimitsBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v20M17 5H9a3 3 0 100 6h6a3 3 0 010 6H7"/></svg>Limits
+          </button>
+          <button class="ctrl-btn" id="cardVirtualBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg>Virtual
+          </button>
+          <button class="ctrl-btn" id="cardReportBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 9v4M12 17h.01M10.3 3.6L2 18a2 2 0 001.7 3h16.6A2 2 0 0022 18L13.7 3.6a2 2 0 00-3.4 0z"/></svg>Report
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="section-head"><h2>Card <em>activity</em></h2></div>
+    <section class="data-table" id="cardActivityList">
+      <div class="dt-row" style="grid-template-columns:1fr auto auto;cursor:pointer" data-tx="Le Bernardin">
+        <div><div class="dt-name">Le Bernardin</div><div class="dt-sub">Dining · May 19</div></div>
+        <span class="badge badge-gold">Dining</span>
+        <div class="dt-amt">−$487.30</div>
+      </div>
+      <div class="dt-row" style="grid-template-columns:1fr auto auto;cursor:pointer" data-tx="Hermes">
+        <div><div class="dt-name">Hermès Madison Ave</div><div class="dt-sub">Retail · May 18</div></div>
+        <span class="badge badge-gold">Shopping</span>
+        <div class="dt-amt">−$1,920.00</div>
+      </div>
+      <div class="dt-row" style="grid-template-columns:1fr auto auto;cursor:pointer" data-tx="Aman New York">
+        <div><div class="dt-name">Aman New York</div><div class="dt-sub">Hotel · May 18</div></div>
+        <span class="badge badge-gold">Travel</span>
+        <div class="dt-amt">−$2,840.00</div>
+      </div>
+      <div class="dt-row" style="grid-template-columns:1fr auto auto;cursor:pointer" data-tx="Apple iCloud+">
+        <div><div class="dt-name">Apple — iCloud+</div><div class="dt-sub">Subscription · May 19</div></div>
+        <span class="badge badge-gold">Subscription</span>
+        <div class="dt-amt">−$9.99</div>
+      </div>
+    </section>
+  </div><!-- /page-cards -->
+
+  <!-- ======== PAGE: TRANSFERS ======== -->
+  <div id="page-transfers" class="page">
+    <div class="page-head" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+      <div><h1>Send &amp; <em>Receive</em></h1><p>Instant transfers to anyone, anywhere.</p></div>
+      <button id="newTransferBtn" style="flex-shrink:0;padding:10px 18px;border-radius:var(--r-md);background:linear-gradient(180deg,#e6cf9c,#c9a86a);border:none;color:#1a1408;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;margin-top:4px">+ New transfer</button>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="sc-l">Sent this month</div><div class="sc-v">$28,450</div><div class="sc-d" style="color:var(--red)">↑ 12% vs last month</div></div>
+      <div class="stat-card"><div class="sc-l">Received</div><div class="sc-v" style="color:var(--green)">$24,143</div><div class="sc-d">↑ 5% vs last month</div></div>
+      <div class="stat-card"><div class="sc-l">Pending</div><div class="sc-v">$3,200</div><div class="sc-d">2 transfers</div></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px" id="transferFilters">
+      <button class="act-filter active" data-tf="all">All</button>
+      <button class="act-filter" data-tf="sent">Sent</button>
+      <button class="act-filter" data-tf="received">Received</button>
+      <button class="act-filter" data-tf="pending">Pending</button>
+    </div>
+    <section class="data-table" id="transferList">
+      <div class="dt-row" style="grid-template-columns:38px 1fr auto auto;cursor:pointer" data-tx="Eliana Voss" data-tf="received">
+        <div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg></div>
+        <div><div class="dt-name">Eliana Voss</div><div class="dt-sub">Split bill · May 18 · 7:58 PM</div></div>
+        <span class="badge badge-green">Received</span>
+        <div class="dt-amt" style="color:var(--green)">+$143.50</div>
+      </div>
+      <div class="dt-row" style="grid-template-columns:38px 1fr auto auto;cursor:pointer" data-tx="Julien Renard" data-tf="sent">
+        <div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg></div>
+        <div><div class="dt-name">Julien Renard</div><div class="dt-sub">Dinner share · May 17 · 9:10 PM</div></div>
+        <span class="badge badge-gold">Sent</span>
+        <div class="dt-amt">−$320.00</div>
+      </div>
+      <div class="dt-row" style="grid-template-columns:38px 1fr auto auto;cursor:pointer" data-tx="Wire Veridian" data-tf="received">
+        <div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h18M12 3v18"/></svg></div>
+        <div><div class="dt-name">Veridian Capital</div><div class="dt-sub">Wire deposit · May 19 · 9:01 AM</div></div>
+        <span class="badge badge-green">Received</span>
+        <div class="dt-amt" style="color:var(--green)">+$24,000.00</div>
+      </div>
+      <div class="dt-row" style="grid-template-columns:38px 1fr auto auto;cursor:pointer" data-tx="Marcus Holt" data-tf="sent">
+        <div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg></div>
+        <div><div class="dt-name">Marcus Holt</div><div class="dt-sub">Loan repayment · May 15 · 2:00 PM</div></div>
+        <span class="badge badge-gold">Sent</span>
+        <div class="dt-amt">−$5,000.00</div>
+      </div>
+      <div class="dt-row" style="grid-template-columns:38px 1fr auto auto;cursor:pointer" data-tx="Sloane Kim" data-tf="pending">
+        <div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg></div>
+        <div><div class="dt-name">Sloane Kim</div><div class="dt-sub">Pending · May 20 · Scheduled</div></div>
+        <span class="badge badge-red">Pending</span>
+        <div class="dt-amt">−$1,200.00</div>
+      </div>
+    </section>
+  </div><!-- /page-transfers -->
+
+  <!-- ======== PAGE: ANALYTICS ======== -->
+  <div id="page-analytics" class="page">
+    <div class="page-head">
+      <h1>Spend <em>Analytics</em></h1>
+      <p>Full picture of your cash flow and habits.</p>
+    </div>
+
+    <!-- Period selector -->
+    <div id="analyticsperiods" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+      <button class="act-filter active" data-period="may">This Month</button>
+      <button class="act-filter" data-period="apr">Last Month</button>
+      <button class="act-filter" data-period="q1">Last 3 Months</button>
+      <button class="act-filter" data-period="year">This Year</button>
+    </div>
+
+    <!-- Stat cards (updated by JS) -->
+    <div class="stat-grid" id="analyticsStats">
+      <div class="stat-card"><div class="sc-l">Total spent</div><div class="sc-v" id="aStatSpent">$12,847</div><div class="sc-d" id="aStatSpentD">↓ 8.2% under budget</div></div>
+      <div class="stat-card"><div class="sc-l">Avg / day</div><div class="sc-v" id="aStatAvg">$428</div><div class="sc-d" id="aStatAvgD">vs $465 last month</div></div>
+      <div class="stat-card"><div class="sc-l">Largest spend</div><div class="sc-v" id="aStatLargest">$2,840</div><div class="sc-d" id="aStatLargestD">Aman New York</div></div>
+      <div class="stat-card"><div class="sc-l">Transactions</div><div class="sc-v" id="aStatTx">47</div><div class="sc-d" id="aStatTxD">this period</div></div>
+    </div>
+
+    <!-- Monthly trend chart -->
+    <div class="section-head"><h2>Monthly <em>trend</em></h2></div>
+    <div class="panel" style="padding:20px">
+      <svg id="trendChart" viewBox="0 0 360 100" style="width:100%;display:block"></svg>
+      <div id="trendLabels" style="display:flex;justify-content:space-between;margin-top:8px;font-family:var(--mono);font-size:9px;color:var(--ink-faint);letter-spacing:.06em"></div>
+    </div>
+
+    <!-- Category breakdown -->
+    <div class="section-head" style="margin-top:20px"><h2>Spending <em>breakdown</em></h2></div>
+    <div class="panel" id="analyticsCats" style="padding:8px 16px"></div>
+  </div><!-- /page-analytics -->
+
+  <!-- ======== PAGE: ACTIVITY ======== -->
+  <div id="page-activity" class="page">
+    <div class="page-head">
+      <h1>All <em>Activity</em></h1>
+      <p>Complete transaction history.</p>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="sc-l">Money in</div><div class="sc-v" style="color:var(--green)">+$25,983.50</div><div class="sc-d">May 2026</div></div>
+      <div class="stat-card"><div class="sc-l">Money out</div><div class="sc-v">−$11,237.29</div><div class="sc-d">May 2026</div></div>
+      <div class="stat-card"><div class="sc-l">Transactions</div><div class="sc-v">11</div><div class="sc-d">this month</div></div>
+    </div>
+    <div id="activityFilters" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+      <button class="act-filter active" data-filter="all">All</button>
+      <button class="act-filter" data-filter="dining">Dining</button>
+      <button class="act-filter" data-filter="transfer">Transfer</button>
+      <button class="act-filter" data-filter="investment">Investment</button>
+      <button class="act-filter" data-filter="subscription">Subscription</button>
+      <button class="act-filter" data-filter="hospitality">Hospitality</button>
+      <button class="act-filter" data-filter="retail">Retail</button>
+      <button class="act-filter" data-filter="deposit">Deposit</button>
+    </div>
+    <section class="tx-list" id="activityList">
+      <div class="tx-group-label" data-group="today">Today — May 19</div>
+      <div class="tx" data-tx="Le Bernardin" data-cat="dining"><div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2l1 4h10l1-4M5 6h14l-1 14H6L5 6z"/></svg></div><div class="tx-meta"><div class="name">Le Bernardin</div><div class="sub">DINING · NEW YORK</div></div><div class="tx-amt">−$487.30<span class="time">8:42 PM</span></div></div>
+      <div class="tx" data-tx="Apple iCloud+" data-cat="subscription"><div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 17l4-12 4 12M16 12h6M19 9v6"/></svg></div><div class="tx-meta"><div class="name">Apple — iCloud+</div><div class="sub">SUBSCRIPTION · MONTHLY</div></div><div class="tx-amt">−$9.99<span class="time">2:15 PM</span></div></div>
+      <div class="tx" data-tx="Wire Veridian" data-cat="deposit"><div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h18M12 3v18"/></svg></div><div class="tx-meta"><div class="name">Wire — Veridian Capital</div><div class="sub">DEPOSIT · REF. VC-882019</div></div><div class="tx-amt pos">+$24,000.00<span class="time">9:01 AM</span></div></div>
+      <div class="tx-group-label" data-group="may18">Yesterday — May 18</div>
+      <div class="tx" data-tx="Aman New York" data-cat="hospitality"><div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9l9-6 9 6v11H3z"/></svg></div><div class="tx-meta"><div class="name">Aman New York</div><div class="sub">HOSPITALITY · LODGING</div></div><div class="tx-amt">−$2,840.00<span class="time">11:20 PM</span></div></div>
+      <div class="tx" data-tx="Eliana Voss" data-cat="transfer"><div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg></div><div class="tx-meta"><div class="name">Eliana Voss</div><div class="sub">TRANSFER · SPLIT BILL</div></div><div class="tx-amt pos">+$143.50<span class="time">7:58 PM</span></div></div>
+      <div class="tx" data-tx="Hermes" data-cat="retail"><div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-7"/></svg></div><div class="tx-meta"><div class="name">Hermès Madison Ave</div><div class="sub">RETAIL · APPAREL</div></div><div class="tx-amt">−$1,920.00<span class="time">3:14 PM</span></div></div>
+      <div class="tx-group-label" data-group="may17">May 17</div>
+      <div class="tx" data-tx="Julien Renard" data-cat="transfer"><div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h16M14 6l6 6-6 6"/></svg></div><div class="tx-meta"><div class="name">Julien Renard</div><div class="sub">TRANSFER · SENT</div></div><div class="tx-amt">−$320.00<span class="time">9:10 PM</span></div></div>
+      <div class="tx" data-tx="Nobu New York" data-cat="dining"><div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2l1 4h10l1-4M5 6h14l-1 14H6L5 6z"/></svg></div><div class="tx-meta"><div class="name">Nobu New York</div><div class="sub">DINING · NEW YORK</div></div><div class="tx-amt">−$380.00<span class="time">9:45 PM</span></div></div>
+      <div class="tx" data-tx="Equinox" data-cat="subscription"><div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9l9-6 9 6v11H3z"/></svg></div><div class="tx-meta"><div class="name">Equinox — Monthly</div><div class="sub">SUBSCRIPTION · FITNESS</div></div><div class="tx-amt">−$280.00<span class="time">6:00 AM</span></div></div>
+      <div class="tx-group-label" data-group="may15">May 15</div>
+      <div class="tx" data-tx="Marcus Holt" data-cat="transfer"><div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg></div><div class="tx-meta"><div class="name">Marcus Holt</div><div class="sub">TRANSFER · SENT</div></div><div class="tx-amt">−$5,000.00<span class="time">2:00 PM</span></div></div>
+      <div class="tx" data-tx="Dividend Vanguard" data-cat="investment"><div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h18M12 3v18"/></svg></div><div class="tx-meta"><div class="name">Dividend — Vanguard</div><div class="sub">INVESTMENT · QUARTERLY</div></div><div class="tx-amt pos">+$1,840.00<span class="time">10:00 AM</span></div></div>
+    </section>
+  </div><!-- /page-activity -->
+
+  <!-- ======== PAGE: INVESTMENTS ======== -->
+  <div id="page-investments" class="page">
+    <div class="page-head">
+      <h1>Investment <em>Portfolio</em></h1>
+      <p>Real-time overview of your holdings.</p>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="sc-l">Total value</div><div class="sc-v">$842,300</div><div class="sc-d">↑ +$14,200 today</div></div>
+      <div class="stat-card"><div class="sc-l">Day gain</div><div class="sc-v">+1.72%</div><div class="sc-d">vs S&amp;P +0.91%</div></div>
+      <div class="stat-card"><div class="sc-l">YTD return</div><div class="sc-v">+18.4%</div><div class="sc-d">↑ Outperforming</div></div>
+    </div>
+    <div class="section-head"><h2>Your <em>Holdings</em></h2><a href="#" id="newPositionBtn" style="color:var(--gold);font-size:13px;text-decoration:none">+ New position</a></div>
+    <div class="panel" style="padding:22px" id="invHoldingsList">
+      <div class="asset-row" style="cursor:pointer" data-asset="0">
+        <div class="asset-dot" style="background:#c9a86a"></div>
+        <div style="flex:1"><div style="font-size:13.5px;color:var(--ink)">Apple Inc.</div><div style="font-family:var(--mono);font-size:10px;color:var(--ink-dim);margin-top:2px">AAPL · 120 shares</div></div>
+        <div class="asset-bar"><div class="asset-bar-fill" style="width:80%;background:var(--gold)"></div></div>
+        <div style="text-align:right"><div style="font-family:var(--mono);font-size:12px">$24,840</div><div class="asset-change up"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 10l-5-5-5 5"/></svg>+2.4%</div></div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--ink-faint);flex-shrink:0;margin-left:4px"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+      <div class="asset-row" style="cursor:pointer" data-asset="1">
+        <div class="asset-dot" style="background:#7dd3a0"></div>
+        <div style="flex:1"><div style="font-size:13.5px;color:var(--ink)">Vanguard S&amp;P 500</div><div style="font-family:var(--mono);font-size:10px;color:var(--ink-dim);margin-top:2px">VOO · 340 shares</div></div>
+        <div class="asset-bar"><div class="asset-bar-fill" style="width:65%;background:var(--green)"></div></div>
+        <div style="text-align:right"><div style="font-family:var(--mono);font-size:12px">$168,000</div><div class="asset-change up"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 10l-5-5-5 5"/></svg>+0.9%</div></div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--ink-faint);flex-shrink:0;margin-left:4px"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+      <div class="asset-row" style="cursor:pointer" data-asset="2">
+        <div class="asset-dot" style="background:#e88f8f"></div>
+        <div style="flex:1"><div style="font-size:13.5px;color:var(--ink)">Tesla Inc.</div><div style="font-family:var(--mono);font-size:10px;color:var(--ink-dim);margin-top:2px">TSLA · 85 shares</div></div>
+        <div class="asset-bar"><div class="asset-bar-fill" style="width:40%;background:var(--red)"></div></div>
+        <div style="text-align:right"><div style="font-family:var(--mono);font-size:12px">$19,210</div><div class="asset-change dn"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 14l5 5 5-5"/></svg>−1.8%</div></div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--ink-faint);flex-shrink:0;margin-left:4px"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+      <div class="asset-row" style="cursor:pointer" data-asset="3">
+        <div class="asset-dot" style="background:#9aa0ab"></div>
+        <div style="flex:1"><div style="font-size:13.5px;color:var(--ink)">Bitcoin</div><div style="font-family:var(--mono);font-size:10px;color:var(--ink-dim);margin-top:2px">BTC · 2.4 BTC</div></div>
+        <div class="asset-bar"><div class="asset-bar-fill" style="width:55%;background:#9aa0ab"></div></div>
+        <div style="text-align:right"><div style="font-family:var(--mono);font-size:12px">$158,400</div><div class="asset-change up"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 10l-5-5-5 5"/></svg>+3.2%</div></div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--ink-faint);flex-shrink:0;margin-left:4px"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+      <div class="asset-row" style="cursor:pointer" data-asset="4">
+        <div class="asset-dot" style="background:#6b8aab"></div>
+        <div style="flex:1"><div style="font-size:13.5px;color:var(--ink)">Real Estate Fund</div><div style="font-family:var(--mono);font-size:10px;color:var(--ink-dim);margin-top:2px">REIT · Private</div></div>
+        <div class="asset-bar"><div class="asset-bar-fill" style="width:70%;background:#6b8aab"></div></div>
+        <div style="text-align:right"><div style="font-family:var(--mono);font-size:12px">$320,000</div><div class="asset-change up"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 10l-5-5-5 5"/></svg>+0.3%</div></div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--ink-faint);flex-shrink:0;margin-left:4px"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+    </div>
+  </div><!-- /page-investments -->
+
+  <!-- ======== PAGE: SAVINGS ======== -->
+  <div id="page-savings" class="page">
+    <div class="page-head">
+      <h1>Savings <em>Goals</em></h1>
+      <p>Track progress towards what matters most.</p>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="sc-l">Total saved</div><div class="sc-v">$92,300</div><div class="sc-d">across all goals</div></div>
+      <div class="stat-card"><div class="sc-l">Monthly auto-save</div><div class="sc-v">$4,500</div><div class="sc-d">active</div></div>
+      <div class="stat-card"><div class="sc-l">Goals complete</div><div class="sc-v">1 / 4</div><div class="sc-d">on track</div></div>
+    </div>
+    <div class="section-head"><h2>Active <em>goals</em></h2><a href="#" id="newGoalBtn" style="color:var(--gold);font-size:13px;text-decoration:none">+ New goal</a></div>
+    <div class="panel" id="savingsGoalsList">
+      <div class="goal" style="cursor:pointer" data-goal="0"><div class="goal-ring"><svg viewBox="0 0 40 40"><circle class="bg" cx="20" cy="20" r="17"/><circle class="fg" cx="20" cy="20" r="17" stroke-dasharray="106.8" stroke-dashoffset="29.9"/></svg><div class="pct">72%</div></div><div class="goal-info"><div class="n">Kyoto · Autumn '26</div><div class="a">$10,800 of $15,000 · Auto-save $500/mo</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--ink-faint);flex-shrink:0"><path d="M9 18l6-6-6-6"/></svg></div>
+      <div class="goal" style="cursor:pointer" data-goal="1"><div class="goal-ring"><svg viewBox="0 0 40 40"><circle class="bg" cx="20" cy="20" r="17"/><circle class="fg" cx="20" cy="20" r="17" stroke-dasharray="106.8" stroke-dashoffset="64.1"/></svg><div class="pct">40%</div></div><div class="goal-info"><div class="n">Steinway Grand Piano</div><div class="a">$36,000 of $90,000 · Auto-save $2,000/mo</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--ink-faint);flex-shrink:0"><path d="M9 18l6-6-6-6"/></svg></div>
+      <div class="goal" style="cursor:pointer" data-goal="2"><div class="goal-ring"><svg viewBox="0 0 40 40"><circle class="bg" cx="20" cy="20" r="17"/><circle class="fg" cx="20" cy="20" r="17" stroke-dasharray="106.8" stroke-dashoffset="9.6"/></svg><div class="pct">91%</div></div><div class="goal-info"><div class="n">Emergency Reserve</div><div class="a">$45,500 of $50,000 · On track</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--ink-faint);flex-shrink:0"><path d="M9 18l6-6-6-6"/></svg></div>
+      <div class="goal" style="cursor:pointer" data-goal="3"><div class="goal-ring"><svg viewBox="0 0 40 40"><circle class="bg" cx="20" cy="20" r="17"/><circle class="fg" cx="20" cy="20" r="17" stroke-dasharray="106.8" stroke-dashoffset="0"/></svg><div class="pct" style="color:var(--green)">100%</div></div><div class="goal-info"><div class="n">Paris Trip '25 ✓</div><div class="a">$12,000 of $12,000 · Completed</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--ink-faint);flex-shrink:0"><path d="M9 18l6-6-6-6"/></svg></div>
+    </div>
+  </div><!-- /page-savings -->
+
+  <!-- ======== PAGE: CONCIERGE ======== -->
+  <div id="page-concierge" class="page">
+    <div class="page-head">
+      <h1>Private <em>Concierge</em></h1>
+      <p>Dedicated service, available 24 / 7.</p>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="sc-l">Your advisor</div><div class="sc-v" style="font-size:18px;font-family:var(--display)">Nathaniel Cross</div><div class="sc-d">Available now</div></div>
+      <div class="stat-card"><div class="sc-l">Response time</div><div class="sc-v">&lt; 2 min</div><div class="sc-d">avg this month</div></div>
+      <div class="stat-card"><div class="sc-l">Requests</div><div class="sc-v">14</div><div class="sc-d">fulfilled this year</div></div>
+    </div>
+    <div class="section-head"><h2>Our <em>services</em></h2></div>
+    <div class="panel">
+      <div class="goal" style="cursor:pointer" onclick="openConcierge('travel')">
+        <div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 9l9-6 9 6v11H3z"/></svg></div>
+        <div class="goal-info"><div class="n">Private Travel Booking</div><div class="a">Flights, hotels, yachts, private jets</div></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--ink-faint)"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+      <div class="goal" style="cursor:pointer" onclick="openConcierge('dining')">
+        <div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2l1 4h10l1-4M5 6h14l-1 14H6L5 6z"/></svg></div>
+        <div class="goal-info"><div class="n">Restaurant Reservations</div><div class="a">Priority access to top-tier restaurants</div></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--ink-faint)"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+      <div class="goal" style="cursor:pointer" onclick="openConcierge('events')">
+        <div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+        <div class="goal-info"><div class="n">Events &amp; Tickets</div><div class="a">Opera, sports, exclusive galas</div></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--ink-faint)"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+      <div class="goal" style="cursor:pointer" onclick="openConcierge('advisor')">
+        <div class="tx-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 013.08 4.18 2 2 0 015.09 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L9.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div>
+        <div class="goal-info"><div class="n">Speak to Advisor</div><div class="a">Direct line to Nathaniel Cross</div></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--ink-faint)"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+    </div>
+  </div><!-- /page-concierge -->
+
+  </main>
+
+  <!-- ============ RIGHT PANEL ============ -->
+  <aside>
+    <!-- Transfer -->
+    <div class="panel" id="transferPanel">
+      <div class="panel-head">
+        <h3>Quick <em>transfer</em></h3>
+        <button class="icon-btn" style="width:30px;height:30px" id="addRecipBtn" title="Add recipient">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+
+      <!-- STATE: FORM (default) -->
+      <div class="transfer-state active" id="ts-form">
+        <div class="transfer-recipients" id="recipientsList">
+          <div class="recip active" data-name="Eliana" data-initials="EV">
+            <div class="av">EV</div><div class="n">Eliana</div>
+          </div>
+          <div class="recip" data-name="Julien" data-initials="JR">
+            <div class="av">JR</div><div class="n">Julien</div>
+          </div>
+          <div class="recip" data-name="Sloane" data-initials="SK">
+            <div class="av">SK</div><div class="n">Sloane</div>
+          </div>
+          <div class="recip" data-name="Marcus" data-initials="MH">
+            <div class="av">MH</div><div class="n">Marcus</div>
+          </div>
+        </div>
+        <div style="font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:8px">
+          Sending to: <span id="selectedRecipName" style="color:var(--gold-soft)">Eliana</span>
+        </div>
+        <div class="input-group">
+          <label>Amount</label>
+          <div class="input-wrap">
+            <span class="cur">$</span><input id="amtInput" type="text" value="250" inputmode="decimal"/>
+          </div>
+          <div class="quick-amts">
+            <button data-v="50">$50</button>
+            <button data-v="100">$100</button>
+            <button data-v="250" class="sel">$250</button>
+            <button data-v="500">$500</button>
+            <button data-v="1000">$1,000</button>
+          </div>
+        </div>
+        <button class="btn-primary" id="sendBtn">Send instantly</button>
+      </div>
+
+      <!-- STATE: CONFIRM -->
+      <div class="transfer-state" id="ts-confirm">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim);text-align:center;margin-top:4px">Confirm transfer</div>
+        <div class="tx-confirm-amount" id="confirmAmt">$250</div>
+        <div class="tx-confirm-to">To <span id="confirmName">Eliana</span></div>
+        <div style="background:var(--glass-2);border:1px solid var(--line);border-radius:var(--r-md);padding:4px 14px;margin-bottom:16px">
+          <div class="tx-confirm-row"><span class="ck">From</span><span class="cv">Sovereign ···· 8821</span></div>
+          <div class="tx-confirm-row"><span class="ck">Arrives</span><span class="cv">Instantly</span></div>
+          <div class="tx-confirm-row"><span class="ck">Fee</span><span class="cv" style="color:var(--green)">No fee</span></div>
+        </div>
+        <button class="btn-primary" id="confirmSendBtn">Confirm &amp; send</button>
+        <button class="btn-outline" id="cancelSendBtn">Cancel</button>
+      </div>
+
+      <!-- STATE: SUCCESS -->
+      <div class="transfer-state" id="ts-success">
+        <div class="tx-success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <div class="tx-success-heading">Sent successfully</div>
+        <div class="tx-success-sub" id="successMsg">$250 sent to Eliana</div>
+        <div class="tx-success-ref" id="successRef">REF: TXN-2026-00000</div>
+        <button class="btn-primary" id="doneSendBtn" style="margin-top:20px">Done</button>
+      </div>
+
+      <!-- STATE: ADD RECIPIENT -->
+      <div class="transfer-state" id="ts-addrecip">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:14px">New recipient</div>
+        <div class="add-recip-form">
+          <label>Full name</label>
+          <input id="newRecipName" type="text" placeholder="e.g. Sara Ahmed"/>
+          <label>Account / phone</label>
+          <input id="newRecipAccount" type="text" placeholder="e.g. +92 300 1234567"/>
+        </div>
+        <button class="btn-primary" id="saveRecipBtn">Add recipient</button>
+        <button class="btn-outline" id="cancelAddRecipBtn">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Goals -->
+    <div class="panel" id="goalsPanel">
+      <div class="panel-head">
+        <h3>Savings <em>goals</em></h3>
+        <button id="editGoalsBtn" style="color:var(--ink-dim);font-size:11px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;text-decoration:none;background:none;border:none;cursor:pointer;padding:0;transition:color .2s">Edit</button>
+      </div>
+
+      <div id="goals-view">
+        <div class="goal" id="gv-0">
+          <div class="goal-ring">
+            <svg viewBox="0 0 40 40"><circle class="bg" cx="20" cy="20" r="17"/><circle class="fg" id="gring-0" cx="20" cy="20" r="17" stroke-dasharray="106.8" stroke-dashoffset="106.8" data-target="29.9"/></svg>
+            <div class="pct" id="gpct-0">72%</div>
+          </div>
+          <div class="goal-info">
+            <div class="n" id="gname-0">Kyoto · Autumn '26</div>
+            <div class="a" id="gamt-0">$10,800 of $15,000</div>
+          </div>
+        </div>
+        <div class="goal" id="gv-1">
+          <div class="goal-ring">
+            <svg viewBox="0 0 40 40"><circle class="bg" cx="20" cy="20" r="17"/><circle class="fg" id="gring-1" cx="20" cy="20" r="17" stroke-dasharray="106.8" stroke-dashoffset="106.8" data-target="64.1"/></svg>
+            <div class="pct" id="gpct-1">40%</div>
+          </div>
+          <div class="goal-info">
+            <div class="n" id="gname-1">Steinway Grand</div>
+            <div class="a" id="gamt-1">$36,000 of $90,000</div>
+          </div>
+        </div>
+        <div class="goal" id="gv-2">
+          <div class="goal-ring">
+            <svg viewBox="0 0 40 40"><circle class="bg" cx="20" cy="20" r="17"/><circle class="fg" id="gring-2" cx="20" cy="20" r="17" stroke-dasharray="106.8" stroke-dashoffset="106.8" data-target="9.6"/></svg>
+            <div class="pct" id="gpct-2">91%</div>
+          </div>
+          <div class="goal-info">
+            <div class="n" id="gname-2">Emergency reserve</div>
+            <div class="a" id="gamt-2">$45,500 of $50,000</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EDIT MODE (hidden by default) -->
+      <div id="goals-edit" style="display:none">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:14px">Tap a field to edit</div>
+        <div id="goal-edit-list"></div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button id="goalsSaveBtn" style="flex:1;padding:11px;border-radius:var(--r-sm);background:linear-gradient(180deg,#e6cf9c,#c9a86a);border:0;color:#1a1408;font-weight:600;font-size:13px;cursor:pointer;">Save changes</button>
+          <button id="goalsCancelBtn" style="padding:11px 14px;border-radius:var(--r-sm);background:transparent;border:1px solid var(--line);color:var(--ink-dim);font-size:13px;cursor:pointer;">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+  <a href="#" class="active" data-page="overview">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
+  </a>
+  <a href="#" data-page="cards">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg>
+  </a>
+  <a href="#" class="send" id="mobileSendBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+  </a>
+  <a href="#" data-page="analytics">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18M7 14l4-4 4 3 5-7"/></svg>
+  </a>
+  <a href="#" data-page="activity">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v4l2 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+  </a>
+  <a href="#" id="mobileProfileBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
+  </a>
+</nav>
+
+<!-- Card Control Drawer -->
+<div class="cg-overlay" id="cardCtrlOverlay">
+  <div class="cg-drawer" id="cardCtrlDrawer">
+    <div class="cg-handle" id="cardCtrlHandle"></div>
+    <div class="cg-hd">
+      <div>
+        <div class="cg-title" id="cardCtrlTitle"></div>
+        <div class="cg-sub" id="cardCtrlSub"></div>
+      </div>
+      <button class="icon-btn" id="cardCtrlClose">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="cg-body" id="cardCtrlBody"></div>
+  </div>
+</div>
+
+<!-- New Transfer Drawer -->
+<div class="cg-overlay" id="ntOverlay">
+  <div class="cg-drawer" id="ntDrawer">
+    <div class="cg-handle" id="ntHandle"></div>
+    <div class="cg-hd">
+      <div>
+        <div class="cg-title" id="ntTitle">New Transfer</div>
+        <div class="cg-sub" id="ntSub">Send money instantly</div>
+      </div>
+      <button class="icon-btn" id="ntClose">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="cg-body" id="ntBody"></div>
+  </div>
+</div>
+
+<!-- Investment Detail Drawer -->
+<div class="cg-overlay" id="invOverlay">
+  <div class="cg-drawer" id="invDrawer">
+    <div class="cg-handle" id="invHandle"></div>
+    <div class="cg-hd">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div id="invDot" style="width:12px;height:12px;border-radius:50%;flex-shrink:0"></div>
+        <div>
+          <div class="cg-title" id="invTitle"></div>
+          <div class="cg-sub" id="invSub"></div>
+        </div>
+      </div>
+      <button class="icon-btn" id="invClose">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="cg-body" id="invBody"></div>
+  </div>
+</div>
+
+<!-- Savings Goal Drawer -->
+<div class="cg-overlay" id="sgOverlay">
+  <div class="cg-drawer" id="sgDrawer">
+    <div class="cg-handle" id="sgHandle"></div>
+    <div class="cg-hd">
+      <div>
+        <div class="cg-title" id="sgTitle"></div>
+        <div class="cg-sub" id="sgSub"></div>
+      </div>
+      <button class="icon-btn" id="sgClose">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="cg-body" id="sgBody"></div>
+  </div>
+</div>
+
+<!-- Concierge Service Drawer -->
+<div class="cg-overlay" id="cgOverlay">
+  <div class="cg-drawer" id="cgDrawer">
+    <div class="cg-handle" id="cgHandle"></div>
+    <div class="cg-hd">
+      <div>
+        <div class="cg-hd-icon" id="cgIcon"></div>
+        <div class="cg-title" id="cgTitle"></div>
+        <div class="cg-sub" id="cgSub"></div>
+      </div>
+      <button class="icon-btn" id="cgClose" style="flex-shrink:0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="cg-body" id="cgBody"></div>
+  </div>
+</div>
+
+<!-- Notification dropdown lives at body level to avoid transform stacking-context traps -->
+<div class="notif-dropdown" id="notifDropdown">
+  <div class="notif-hd">
+    <span>Notifications</span>
+    <button class="mark-read" id="markAllRead">Mark all read</button>
+  </div>
+  <div class="notif-item" data-read="false" data-nav="activity">
+    <div class="ni-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h18M12 3v18"/></svg></div>
+    <div class="ni-body">
+      <div class="ni-title">Wire received — +$24,000 from Veridian Capital</div>
+      <div class="ni-time">Today · 9:01 AM</div>
+    </div>
+    <div class="ni-dot"></div>
+  </div>
+  <div class="notif-item" data-read="false" data-nav="investments">
+    <div class="ni-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+    <div class="ni-body">
+      <div class="ni-title">3 portfolio positions need your review</div>
+      <div class="ni-time">Today · 7:30 AM</div>
+    </div>
+    <div class="ni-dot"></div>
+  </div>
+  <div class="notif-item" data-read="false" data-nav="savings">
+    <div class="ni-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v20M17 5H9a3 3 0 100 6h6a3 3 0 010 6H7"/></svg></div>
+    <div class="ni-body">
+      <div class="ni-title">Kyoto goal is 72% funded — on track</div>
+      <div class="ni-time">Yesterday · 6:00 PM</div>
+    </div>
+    <div class="ni-dot"></div>
+  </div>
+  <div class="notif-item read" data-read="true" data-nav="activity">
+    <div class="ni-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8a6 6 0 1112 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/></svg></div>
+    <div class="ni-body">
+      <div class="ni-title">Statement for April is ready to download</div>
+      <div class="ni-time">May 1 · 8:00 AM</div>
+    </div>
+    <div class="ni-dot"></div>
+  </div>
+</div>
+<!-- ========== WELCOME SCREEN (post sign-in) ========== -->
+<div id="welcomeScreen" style="position:fixed;inset:0;z-index:1990;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(7,9,13,.97);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px)">
+  <div style="width:100%;max-width:440px;text-align:center">
+
+    <!-- animated gold check -->
+    <div class="ws-row" style="animation-delay:.05s;margin-bottom:32px">
+      <div style="position:relative;width:88px;height:88px;margin:0 auto;animation:wsPop .6s cubic-bezier(.2,.8,.2,1) both .1s">
+        <div style="width:88px;height:88px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#f5f0e4,#c9a86a 48%,#a87820);animation:wsRing 2.4s ease-in-out infinite .7s;box-shadow:0 0 0 12px rgba(201,168,106,.1),0 8px 36px rgba(201,168,106,.45)"></div>
+        <svg style="position:absolute;inset:0;margin:auto" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#0d1118" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+      </div>
+    </div>
+
+    <!-- label -->
+    <div class="ws-row" style="animation-delay:.2s;font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:10px">Authentication successful</div>
+
+    <!-- name -->
+    <h1 id="wsGreeting" class="ws-row" style="animation-delay:.28s;font-family:var(--display);font-size:38px;font-weight:300;letter-spacing:-.03em;line-height:1.1;margin-bottom:8px">Good morning, <em>Aiden</em>.</h1>
+
+    <!-- date -->
+    <p id="wsDate" class="ws-row" style="animation-delay:.34s;font-size:13px;color:var(--ink-dim);margin-bottom:28px">Tuesday, 20 May 2026</p>
+
+    <!-- tier badge -->
+    <div class="ws-row" style="animation-delay:.4s;margin-bottom:32px">
+      <div style="display:inline-flex;align-items:center;gap:8px;padding:7px 18px;border-radius:99px;background:rgba(201,168,106,.07);border:1px solid rgba(201,168,106,.28)">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px rgba(201,168,106,.7)"></div>
+        <span style="font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--gold)">SOVEREIGN TIER · PRIVATE BANKING</span>
+      </div>
+    </div>
+
+    <!-- stat cards -->
+    <div class="ws-row" style="animation-delay:.46s;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px">
+      <div style="padding:16px 10px;border-radius:var(--r-sm);background:rgba(255,255,255,.03);border:1px solid var(--line)">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:7px">Balance</div>
+        <div style="font-family:var(--display);font-size:17px;font-weight:400;color:var(--ink)">$284,710</div>
+        <div style="font-size:10px;color:var(--green);margin-top:3px">+2.4% today</div>
+      </div>
+      <div style="padding:16px 10px;border-radius:var(--r-sm);background:rgba(255,255,255,.03);border:1px solid var(--line)">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:7px">Portfolio</div>
+        <div style="font-family:var(--display);font-size:17px;font-weight:400;color:var(--ink)">$1.24M</div>
+        <div style="font-size:10px;color:var(--green);margin-top:3px">+6.7% YTD</div>
+      </div>
+      <div style="padding:16px 10px;border-radius:var(--r-sm);background:rgba(255,255,255,.03);border:1px solid var(--line)">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:7px">Pending</div>
+        <div style="font-family:var(--display);font-size:17px;font-weight:400;color:var(--gold-soft)">3 items</div>
+        <div style="font-size:10px;color:var(--ink-faint);margin-top:3px">Need review</div>
+      </div>
+    </div>
+
+    <!-- last login row -->
+    <div class="ws-row" style="animation-delay:.52s;display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:28px;padding:10px 16px;border-radius:var(--r-sm);background:rgba(255,255,255,.025);border:1px solid var(--line)">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span style="font-size:11px;color:var(--ink-faint)">Last sign-in: &nbsp;Sunday, 18 May · 10:23 PM · New York, NY</span>
+      <div style="width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);margin-left:auto;flex-shrink:0"></div>
+    </div>
+
+    <!-- enter button -->
+    <div class="ws-row" style="animation-delay:.58s">
+      <button id="wsEnterBtn" class="btn-primary" type="button" style="width:100%;padding:15px;font-size:14px;letter-spacing:.05em;display:flex;align-items:center;justify-content:center;gap:10px">
+        Enter Dashboard
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <!-- footer note -->
+    <p class="ws-row" style="animation-delay:.64s;font-size:10px;color:var(--ink-faint);margin-top:14px">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      256-bit TLS encryption &nbsp;·&nbsp; Session secured &nbsp;·&nbsp; Meridian Private Banking
+    </p>
+
+  </div>
+</div>
+
+<!-- ========== SIGN IN MODAL ========== -->
+<div id="signInModal" style="position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(7,9,13,.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)">
+  <div style="width:100%;max-width:400px;animation:fadeUp .4s cubic-bezier(.2,.8,.2,1) both">
+    <!-- brand -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:40px;justify-content:center">
+      <div style="width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#f3efe6,#c9a86a 50%,#b8860b);box-shadow:inset 0 0 0 1px rgba(255,255,255,.2),0 4px 14px rgba(201,168,106,.35)"></div>
+      <div style="font-family:var(--display);font-size:24px;font-weight:400;letter-spacing:-.02em">Meridian<em style="font-style:italic;color:var(--gold-soft)">.</em></div>
+    </div>
+    <!-- card -->
+    <div style="background:rgba(13,17,24,.95);border:1px solid var(--line-strong);border-radius:var(--r-lg);padding:32px;box-shadow:0 40px 80px -20px rgba(0,0,0,.8)">
+      <h2 style="font-family:var(--display);font-size:22px;font-weight:300;letter-spacing:-.02em;margin-bottom:4px">Welcome back</h2>
+      <p style="font-size:13px;color:var(--ink-dim);margin-bottom:28px">Sign in to your Private Banking account</p>
+
+      <div style="margin-bottom:16px">
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:6px">Email address</div>
+        <input id="siEmail" type="email" class="cg-input" placeholder="a.marlowe@meridian.com" value="a.marlowe@meridian.com" autocomplete="email"/>
+      </div>
+      <div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim)">Password</div>
+          <a href="#" id="forgotPwLink" style="font-size:11px;color:var(--gold-soft);text-decoration:none">Forgot password?</a>
+        </div>
+        <div style="position:relative">
+          <input id="siPassword" type="password" class="cg-input" placeholder="••••••••••••" style="padding-right:44px" autocomplete="current-password"/>
+          <button id="siTogglePw" type="button" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--ink-dim);cursor:pointer;padding:4px">
+            <svg id="siEyeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <p id="siError" style="font-size:12px;color:var(--red);margin-bottom:8px;display:none">Incorrect email or password. Please try again.</p>
+      <button class="btn-primary" id="siSubmit" type="button" style="margin-top:16px">Sign in</button>
+
+      <div style="display:flex;align-items:center;gap:12px;margin:20px 0">
+        <div style="flex:1;height:1px;background:var(--line)"></div>
+        <span style="font-size:11px;color:var(--ink-faint)">or continue with</span>
+        <div style="flex:1;height:1px;background:var(--line)"></div>
+      </div>
+      <button id="siBiometric" type="button" style="width:100%;padding:12px;border-radius:var(--r-sm);background:rgba(255,255,255,.04);border:1px solid var(--line-strong);color:var(--ink);font-size:13px;cursor:pointer;font-family:var(--body);display:flex;align-items:center;justify-content:center;gap:10px;transition:background .2s" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.04)'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2C9.243 2 7 4.243 7 7v3H5v12h14V10h-2V7c0-2.757-2.243-5-5-5zm0 2c1.654 0 3 1.346 3 3v3H9V7c0-1.654 1.346-3 3-3z"/></svg>
+        Face ID / Touch ID
+      </button>
+    </div>
+    <p style="text-align:center;font-size:11px;color:var(--ink-faint);margin-top:20px">Protected by 256-bit encryption · Meridian Private Banking</p>
+  </div>
+</div>
+    <script src="js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <radialGradient id="bgGrad" cx="32%" cy="28%" r="78%">
+      <stop offset="0%"   stop-color="#eedfa8"/>
+      <stop offset="52%"  stop-color="#c9a86a"/>
+      <stop offset="100%" stop-color="#7a5e2c"/>
+    </radialGradient>
+    <radialGradient id="gemGrad" cx="35%" cy="30%" r="70%">
+      <stop offset="0%"   stop-color="#fff8e8"/>
+      <stop offset="100%" stop-color="#c9a86a"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Gold circle base -->
+  <circle cx="16" cy="16" r="15.6" fill="url(#bgGrad)"/>
+  <!-- Subtle inner rim -->
+  <circle cx="16" cy="16" r="15.6" fill="none" stroke="rgba(255,255,255,0.26)" stroke-width="0.8"/>
+  <!-- Bottom inner shadow -->
+  <circle cx="16" cy="18" r="14" fill="none" stroke="rgba(0,0,0,0.18)" stroke-width="4"/>
+
+  <!-- Crown body -->
+  <path d="M6.5,22 L9.2,13.2 L13.2,18.8 L16,10.2 L18.8,18.8 L22.8,13.2 L25.5,22 Z"
+        fill="rgba(8,6,2,0.62)"/>
+
+  <!-- Crown base bar -->
+  <rect x="6.5" y="22" width="19" height="3.4" rx="1.4" fill="rgba(8,6,2,0.62)"/>
+
+  <!-- Gem at left peak -->
+  <circle cx="9.2" cy="12.8" r="1.5" fill="url(#gemGrad)" opacity="0.75"/>
+  <!-- Gem at center peak (slightly larger) -->
+  <circle cx="16"  cy="9.8"  r="1.8" fill="url(#gemGrad)" opacity="0.85"/>
+  <!-- Gem at right peak -->
+  <circle cx="22.8" cy="12.8" r="1.5" fill="url(#gemGrad)" opacity="0.75"/>
+</svg>
