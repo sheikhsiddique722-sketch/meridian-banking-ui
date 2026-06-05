@@ -43,7 +43,7 @@ meridian-banking-ui/
 No build step required. Just open `index.html` in any modern browser.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/meridian-banking-ui.git
+https://sheikhsiddique722-sketch.github.io/meridian-banking-ui/
 cd meridian-banking-ui
 # Open index.html in browser
 ```
