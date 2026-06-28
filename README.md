@@ -6,7 +6,7 @@ A premium private banking web application UI with a dark gold theme, built entir
 
 - **Overview Dashboard** — balance display, quick stats, recent transactions
 - **Cards Management** — freeze/unfreeze card, set monthly & daily limits
-- **Transfers** — send money with recipient management
+- **Transfers** — send money with recipient management 
 - **Analytics** — spending charts and breakdowns
 - **Activity Log** — full transaction history with filters
 - **Goals** — savings goal tracking with progress bars
