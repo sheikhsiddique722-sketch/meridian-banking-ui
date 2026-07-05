@@ -1,7 +1,7 @@
 # Meridian — Private Banking UI
 
 A premium private banking web application UI with a dark gold theme, built entirely with HTML, CSS, and JavaScript — no frameworks, no dependencies.
-
+ 
 ## Features
 
 - **Overview Dashboard** — balance display, quick stats, recent transactions
