@@ -1,6 +1,6 @@
 # 🏦 Meridian Banking UI
 
-A modern and responsive banking dashboard built as a frontend project. **Meridian Banking UI** is designed to provide a secure, intuitive, and visually engaging digital banking experience through a clean interface, interactive components, and modern financial dashboard layouts.
+A modern and responsive banking dashboard built as a frontend project. **Meridian Banking UI** is designed to provide a secure, intuitive, and visually engaging digital banking experience through a clean interface, interactive components, and modern financial dashboard layouts. 
 
 The project demonstrates how contemporary banking platforms can present account information, transactions, financial insights, and banking services with a strong focus on usability, accessibility, and responsive design.
 
