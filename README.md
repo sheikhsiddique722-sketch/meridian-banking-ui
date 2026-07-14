@@ -6,7 +6,7 @@ The project demonstrates how contemporary banking platforms can present account 
 
 ---
 
-## 🌐 Live Demo
+## 🌐 Live Demo 
 
 **Website:**
 https://sheikhsiddique722-sketch.github.io/meridian-banking-ui/ 
