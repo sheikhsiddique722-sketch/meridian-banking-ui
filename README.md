@@ -4,7 +4,7 @@ A modern and responsive banking dashboard built as a frontend project. **Meridia
  
 The project demonstrates how contemporary banking platforms can present account information, transactions, financial insights, and banking services with a strong focus on usability, accessibility, and responsive design.
 
---- 
+---  
 
 ## 🌐 Live Demo  
  
